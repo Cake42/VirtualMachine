@@ -69,20 +69,19 @@ void decode()
 		case 0x00:
 		// MUL
 		case 0x03:
-			reg_a 	 = (instr & 0x00110000) >> 16;
-			reg_b 	 = (instr & 0x00001100) >>  8;
-			reg_dest = (instr & 0x00000011) >>  0;
+			reg_a 	 = (instr & 0x00FF0000) >> 16;
+			reg_b 	 = (instr & 0x0000FF00) >>  8;
+			reg_dest = (instr & 0x000000FF) >>  0;
 			break;
 		// LOAD
 		case 0x01:
-			reg_dest = (instr & 0x00110000) >> 16;
-			reg_addr = (instr & 0x00001111) >>  0;
+			reg_dest = (instr & 0x00FF0000) >> 16;
+			reg_addr = (instr & 0x0000FFFF) >>  0;
 			break;
 		// STORE
 		case 0x02:
-			reg_a 	 = (instr & 0x00110000) >> 16;
-			reg_addr = (instr & 0x00001111) >>  0;
-			cout << "reg_addr " << reg_addr << endl;
+			reg_a 	 = (instr & 0x00FF0000) >> 16;
+			reg_addr = (instr & 0x0000FFFF) >>  0;
 			break;
 		default:
 			cout << instr_type << ": instrução ilegal" << endl;
@@ -122,7 +121,7 @@ int main()
 	setlocale(LC_ALL, "Portuguese");
 	
 	// Zerar os registradores e o PC
-	memset(reg, 4, sizeof(uint32_t));
+	memset(reg, 8, sizeof(uint32_t));
 	pc = 0;
 	
 	while (pc < 7)
