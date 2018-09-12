@@ -1,6 +1,5 @@
 #include <iostream>
 #include <clocale>
-#include <cstring>
 
 using namespace std;
 
@@ -24,7 +23,7 @@ using namespace std;
  * 
  * 		Instruções tipo 2:
  * 
- * 		Operação	Reg			Destino
+ * 		Operação	Reg			Memória
  * 		8 bits		8 bits		16 bits
  */
 
@@ -46,17 +45,16 @@ uint32_t reg_addr;
 uint32_t reg[8];
 /* Memória de programa */
 uint32_t prog_mem[] = {
-	0x01030003,
-	0x01040004,
-	0x03030405, // Mult reg[3] com reg[4] e salve em reg[5]
-	0x01000000, // Load reg_addr[0] em reg[0]
-	0x01010001, // Load reg_addr[1] em reg[1]
-	0x00000102, // Add reg[0] com reg[1] e salve em reg[2]
-	0x02020002, // Store reg[2] em reg_addr[2]
+	0x01000000, // Carrega mem[0] em reg[0]
+	0x01010001, // Carrega mem[1] em reg[1]
+	0x00000102, // Soma reg[0] com reg[1] em reg[2]
+	0x01030002, // Carrega mem[2] em reg[3]
+	0x03020302, // Multiplica reg[2] com reg[3] em reg[2]
+	0x02020003, // Salva reg[2] em mem[3]
 };
 
 uint32_t addr_mem[] = {
-	9, 4, 0, 2, 4, 0, 0, 0,
+	2, 3, 10, 0, 0, 0, 0, 0,
 };
 
 void decode()
@@ -120,11 +118,9 @@ int main()
 {
 	setlocale(LC_ALL, "Portuguese");
 	
-	// Zerar os registradores e o PC
-	memset(reg, 8, sizeof(uint32_t));
 	pc = 0;
 	
-	while (pc < 7)
+	while (pc < 6)
 	{
 		instr = prog_mem[pc];
 		decode();
