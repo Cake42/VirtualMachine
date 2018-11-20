@@ -130,7 +130,7 @@ void execute()
 	}
 }
 
-uint32_t load_line(uint32_t pc)
+uint32_t load_cache(uint32_t pc)
 {
 	uint32_t w = pc & 0x00000001;
 	uint32_t l = pc & 0x00000002;
@@ -156,7 +156,7 @@ int main()
 	
 	for (uint32_t pc = 0; pc < 6; pc++)
 	{
-		uint32_t instr = load_line(pc);
+		uint32_t instr = load_cache(pc);
 		decode(instr);
 		execute();
 	}
