@@ -1,9 +1,10 @@
 #include <iostream>
-#include <clocale>
+#include <cstring>
+#include <cmath>
 
 using namespace std;
 
-/**
+/*
  * 		Alunos:
  * 			Flávio Brusamolin Brito - 1249
  * 			Heitor Toledo Lassarote de Paula - 1241
@@ -25,12 +26,15 @@ using namespace std;
  * 
  * 		Operação	Reg			Memória
  * 		8 bits		8 bits		16 bits
+ * 
+ * 		Memória Cache:
+ * 			Cache L1 de 32 bytes;
+ * 			2 palavras de 32 bits;
+ * 			2 linhas;
+ * 			Tag = 32 - (log_2 2 + log_2 2 + 0) = 30 bits;
+ * 			Total = 32 * ((2 * 2) + 30 + 1) = 1120 bits = 140 bytes
  */
 
-/* Program counter */
-uint32_t pc;
-/* Instrução atual */
-uint32_t instr;
 /* Tipo de instrução */
 uint32_t instr_type;
 /* Registrador A */
@@ -54,10 +58,22 @@ uint32_t prog_mem[] = {
 };
 
 uint32_t addr_mem[] = {
-	2, 3, 10, 0, 0, 0, 0, 0,
+	2, 3, 10, 7, 23, 0, 9, 4,
 };
 
-void decode()
+#define WORDS 2
+#define LINES 2
+
+struct line
+{
+	bool valid;
+	uint32_t tag;
+	uint32_t words[WORDS];
+};
+
+line l1[LINES];
+
+void decode(uint32_t instr)
 {
 	// Pegando o tipo de instrução
 	instr_type = instr >> 24;
@@ -82,7 +98,7 @@ void decode()
 			reg_addr = (instr & 0x0000FFFF) >>  0;
 			break;
 		default:
-			cout << instr_type << ": instrução ilegal" << endl;
+			cout << instr_type << ": illegal instruction" << endl;
 			break;
 	}
 }
@@ -114,18 +130,35 @@ void execute()
 	}
 }
 
+uint32_t load_line(uint32_t pc)
+{
+	uint32_t w = pc & 0x00000001;
+	uint32_t l = pc & 0x00000002;
+	uint32_t tag = pc & 0xFFFFFFFC;
+	
+	if (!l1[l].valid || l1[l].tag != tag)
+	{
+		cout << "Miss\n";
+		l1[l].valid = true;
+		l1[l].tag = tag;
+		for (int i = 0; i < WORDS; i++)
+		{
+			l1[l].words[i] = prog_mem[pc + i];
+		}
+	}
+	
+	return l1[l].words[w];
+}
+
 int main()
 {
-	setlocale(LC_ALL, "Portuguese");
+	memset(l1, 0, LINES * sizeof(line));
 	
-	pc = 0;
-	
-	while (pc < 6)
+	for (uint32_t pc = 0; pc < 6; pc++)
 	{
-		instr = prog_mem[pc];
-		decode();
+		uint32_t instr = load_line(pc);
+		decode(instr);
 		execute();
-		pc++;
 	}
 	
 	return 0;
